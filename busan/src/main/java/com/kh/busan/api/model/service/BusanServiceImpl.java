@@ -63,6 +63,7 @@ public class BusanServiceImpl implements BusanService {
 
 	@Override
 	public void save(CommentDTO comment) {
+		
 		mapper.save(comment);
 	}
 
