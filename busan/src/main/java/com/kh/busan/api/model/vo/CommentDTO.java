@@ -1,5 +1,7 @@
 package com.kh.busan.api.model.vo;
 
+import java.io.Serializable;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +15,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 @Builder
-public class CommentDTO {
+public class CommentDTO implements Serializable {
 	private Long foodNo;
 	private String writer;
 	private String content;
