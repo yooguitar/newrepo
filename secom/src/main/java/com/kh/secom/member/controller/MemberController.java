@@ -3,6 +3,7 @@ package com.kh.secom.member.controller;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,7 @@ import com.kh.secom.member.model.service.MemberService;
 import com.kh.secom.member.model.vo.ChangePasswordDTO;
 import com.kh.secom.member.model.vo.LoginResponse;
 import com.kh.secom.member.model.vo.MemberDTO;
+import com.kh.secom.token.model.service.TokenService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class MemberController {
 
 	private final MemberService memberService;
 	private final AuthenticationService authService;
+	private final TokenService tokenService;
 
 	// 새롭게 데이터를 만들어내는 요청(INSERT) == POST
 	// 200ok와 함께 돌려보내면 best
@@ -68,6 +71,23 @@ public class MemberController {
 		// log.info("{}", changeEntity);
 		memberService.changePassword(changeEntity);
 		return ResponseEntity.ok("업데이트 성공~");
+	}
+
+	// 회원 탈퇴 기능
+	// Delete는 하나 뿐이라 매핑을 달지 않았다. members로 delete 요청을 보내면 여기로 온다
+	@DeleteMapping
+	public ResponseEntity<String> deleteByPassword(@RequestBody Map<String, String> password){
+		log.info("{}", password);
+		memberService.deleteByPassword(password);
+		return ResponseEntity.ok("옥까이~");
+	}
+	
+	@PostMapping("/refresh")
+	public ResponseEntity<Map> refresh(@RequestBody Map<String, String> tokens){
+		log.info("오잉??");
+		String refreshToken = tokens.get("refreshToken");
+		Map<String, String> newTokens = tokenService.refreshTokens(refreshToken);
+		return ResponseEntity.ok(newTokens);
 	}
 
 }

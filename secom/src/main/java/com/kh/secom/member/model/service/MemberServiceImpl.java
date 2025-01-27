@@ -50,22 +50,43 @@ public class MemberServiceImpl implements MemberService { // 일반사용자용 
 	@Override
 	public void changePassword(ChangePasswordDTO changeEntity) {
 		// 비밀번호 바꿔주세요
-		// 현재 비밀번호는 currentPassword고 
+		// 현재 비밀번호는 currentPassword고
 		// 이게 맞다면 newPassword로 바꾸고 싶어요.
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		CustomUserDetails user = (CustomUserDetails)auth.getPrincipal();
 		
-		if(!(passwordEncoder.matches(changeEntity.getCurrentPassword(), user.getPassword()))) {
-			throw new MissmatchPasswordException("비밀번호 일치하지 않음");
-		}
+//		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//		CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+//		if (!(passwordEncoder.matches(changeEntity.getCurrentPassword(), user.getPassword()))) {
+//			throw new MissmatchPasswordException("비밀번호 일치하지 않음");
+//		}
+		Long userNo =  passwordMatches(changeEntity.getCurrentPassword());
+		
 		String encodedPassword = passwordEncoder.encode(changeEntity.getNewPassword());
-		
+
 		Map<String, String> changeRequest = new HashMap();
-		changeRequest.put("userNo", String.valueOf(user.getUserNo()));
+		//changeRequest.put("userNo", String.valueOf(user.getUserNo()));
+		changeRequest.put("userNo", String.valueOf(userNo));
 		changeRequest.put("password", encodedPassword);
-		
+
 		memberMapper.changePassword(changeRequest);
+
+	}
+
+	@Override
+	public void deleteByPassword(Map<String, String> password) {
+		// 사용자가 입력한 비밀번호와 DB에 저장되어있는 비밀번호가 서로 일치 하는지 검증하자
+		// '지금 비밀번호는 pincipal에 있다'
+		Long userNo = passwordMatches(password.get("password"));
 		
+		memberMapper.deleteByPassword(userNo);
+	}
+
+	private Long passwordMatches(String password) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+		if (!passwordEncoder.matches(password, userDetails.getPassword())) {
+			throw new MissmatchPasswordException("비밀번호 똑바로 쓰세요!!");
+		}
+		return userDetails.getUserNo();
 	}
 
 }

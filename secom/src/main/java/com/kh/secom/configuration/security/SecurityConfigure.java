@@ -50,6 +50,8 @@ public class SecurityConfigure {
 					requests.requestMatchers("/members", "/members/login").permitAll(); // 인증 없이 이용 가능
 					requests.requestMatchers(HttpMethod.PUT, "/members").authenticated(); // 인증 해야 이용 가능
 					requests.requestMatchers("/admin/**").hasRole("ADMIN"); // admin권한만 사용 가능
+					requests.requestMatchers(HttpMethod.DELETE, "/members").authenticated(); 
+					requests.requestMatchers(HttpMethod.POST, "/members/refresh").authenticated();
 				})
 				/*
 				 * sessionManagement : 세션 관리에 대한 설정을 지정할 수 있음 sessionCreatePolicy : 정책을 설정
