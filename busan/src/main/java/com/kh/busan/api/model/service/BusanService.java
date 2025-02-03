@@ -11,5 +11,6 @@ public interface BusanService {
 
 	List<CommentDTO> getComments(Long foodNo);
 	void save(CommentDTO comment);
+
 	
 }

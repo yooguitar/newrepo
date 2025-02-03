@@ -47,11 +47,16 @@ public class SecurityConfigure {
 				.csrf(AbstractHttpConfigurer::disable) // csrf 비활성화
 				.cors(AbstractHttpConfigurer::disable) // 앞,뒤 분리해서 작업한다. 일단 꺼놓고 나중에 nginx 붙이기
 				.authorizeHttpRequests(requests -> {
-					requests.requestMatchers("/members", "/members/login").permitAll(); // 인증 없이 이용 가능
+					requests.requestMatchers("/members", "/members/login", "/uploads/**").permitAll(); // 인증 없이 이용 가능
 					requests.requestMatchers(HttpMethod.PUT, "/members").authenticated(); // 인증 해야 이용 가능
-					requests.requestMatchers("/admin/**").hasRole("ADMIN"); // admin권한만 사용 가능
-					requests.requestMatchers(HttpMethod.DELETE, "/members").authenticated(); 
+					requests.requestMatchers("/admin/**").hasRole("ADMIN"); // admin 권한만 사용 가능
+					requests.requestMatchers(HttpMethod.DELETE, "/members").authenticated();
 					requests.requestMatchers(HttpMethod.POST, "/members/refresh").authenticated();
+					requests.requestMatchers(HttpMethod.POST, "/boards").authenticated();
+					requests.requestMatchers(HttpMethod.GET, "/boards/**", "/comments/**").permitAll();
+					requests.requestMatchers(HttpMethod.PUT, "/boards/**").authenticated();
+					requests.requestMatchers(HttpMethod.DELETE, "/boards/**").authenticated();
+					requests.requestMatchers(HttpMethod.POST, "/comments").authenticated();
 				})
 				/*
 				 * sessionManagement : 세션 관리에 대한 설정을 지정할 수 있음 sessionCreatePolicy : 정책을 설정
@@ -63,15 +68,15 @@ public class SecurityConfigure {
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
-		// BCrypt를 이미 시큐리티가 가지고 있으므로 호출하여 인스턴스 생성 후 리턴만 하면 끝
 		return new BCryptPasswordEncoder();
+		// BCrypt를 이미 시큐리티가 가지고 있으므로 호출하여 인스턴스 생성 후 리턴만 하면 끝
 	}
 
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
 			throws Exception {
-		// 인증 절차를 수행하는 메소드(인터페이스). 매개변수로 인증정보의 토큰을 받아야 한다.
 		return authenticationConfiguration.getAuthenticationManager();
+		// 인증 절차를 수행하는 메소드(인터페이스). 매개변수로 인증정보의 토큰을 받아야 한다.
 	}
 
 }
