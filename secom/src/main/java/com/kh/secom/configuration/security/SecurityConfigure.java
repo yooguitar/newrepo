@@ -1,9 +1,12 @@
 package com.kh.secom.configuration.security;
 
+import java.util.Arrays;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,6 +16,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.kh.secom.auth.util.JwtFilter;
 
@@ -26,6 +32,20 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfigure {
 
 	private final JwtFilter filter;
+	
+	// @Bean: 스프링 부트의 빈 등록 방법. 자동으로 등록해준다.
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		// Cors 설정에 필요한 객체들 set 하는 작업.
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));// import java.util.Arrays
+		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+		configuration.setAllowCredentials(true); // == 자격 증명 허용하겠다.
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource(); // import UrlBased
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
+	}
 
 	@Bean // Bean 애노테이션을 이용해서 빈으로 등록하는 경우 동일한 이름의 메소드가 존재하면 안됨! 절대 안됨!
 	public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -45,7 +65,7 @@ public class SecurityConfigure {
 		return httpSecurity.formLogin(AbstractHttpConfigurer::disable) // form 로그인 방식은 사용하지 않겠다.
 				.httpBasic(AbstractHttpConfigurer::disable) // httpBasic 사용 안하겠다
 				.csrf(AbstractHttpConfigurer::disable) // csrf 비활성화
-				.cors(AbstractHttpConfigurer::disable) // 앞,뒤 분리해서 작업한다. 일단 꺼놓고 나중에 nginx 붙이기
+				.cors(Customizer.withDefaults()) // 앞,뒤 분리해서 작업한다. 일단 꺼놓고 나중에 nginx 붙이기, import security
 				.authorizeHttpRequests(requests -> {
 					requests.requestMatchers("/members", "/members/login", "/uploads/**").permitAll(); // 인증 없이 이용 가능
 					requests.requestMatchers(HttpMethod.PUT, "/members").authenticated(); // 인증 해야 이용 가능
