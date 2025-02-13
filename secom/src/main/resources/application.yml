@@ -15,6 +15,8 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+  profiles: 
+    include: private
 
 server:
   port: 80
@@ -32,6 +34,3 @@ logging:
     jdbc.sqlonly: DEBUG
     jdbc.resultset: DEBUG
     jdbc.audit: DEBUG
-
-jwt:
-  secret: H7oIaBujRo6fA/a0wdk09iY6STECQZbemMj8bcs5xBMzd0IYxzT+hNQd+fgXvsyz3qHF3DIwuYXUE9m7w5tkDw==
