@@ -11,6 +11,7 @@ import com.kh.secom.auth.service.AuthenticationService;
 import com.kh.secom.board.model.dto.BoardDTO;
 import com.kh.secom.board.model.mapper.BoardMapper;
 import com.kh.secom.exception.InvalidParameterException;
+import com.kh.secom.storage.model.service.StorageService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ public class BoardServiceImpl implements BoardService {
 	private final FileService fileService;
 	private final BoardMapper boardMapper;
 	private final AuthenticationService authService;
+	private final StorageService s3Service;
 
 	@Override
 	public void save(BoardDTO board, MultipartFile file) {
@@ -35,7 +37,11 @@ public class BoardServiceImpl implements BoardService {
 		authService.validWriter(board.getBoardWriter(), user.getUsername());
 
 		if (file != null && !file.isEmpty()) {
-			String filePath = fileService.store(file);
+			// 로컬저장
+			// String filePath = fileService.store(file);
+
+			// 버전 2번
+			String filePath = s3Service.upload(file);
 			board.setBoardFileUrl(filePath);
 		} else {
 			board.setBoardFileUrl(null);
@@ -72,17 +78,17 @@ public class BoardServiceImpl implements BoardService {
 		BoardDTO exsitingBoard = getBoardOrThrow(board.getBoardNo());
 		CustomUserDetails user = authService.getAuthenticatedUser();
 		authService.validWriter(board.getBoardWriter(), user.getUsername());
-		
+
 		exsitingBoard.setBoardTitle(board.getBoardTitle());
 		exsitingBoard.setBoardContent(board.getBoardContent());
-		
-		if(file != null && !file.isEmpty()) {
+
+		if (file != null && !file.isEmpty()) {
 			String filePath = fileService.store(file);
 			exsitingBoard.setBoardFileUrl(filePath);
 		}
-		
+
 		boardMapper.update(exsitingBoard);
-		
+
 		return exsitingBoard;
 	}
 
@@ -91,7 +97,7 @@ public class BoardServiceImpl implements BoardService {
 		BoardDTO exsitingBoard = getBoardOrThrow(boardNo);
 		CustomUserDetails user = authService.getAuthenticatedUser();
 		authService.validWriter(exsitingBoard.getBoardWriter(), user.getUsername());
-		
+
 		boardMapper.deleteById(boardNo);
 	}
 
